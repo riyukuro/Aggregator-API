@@ -7,17 +7,35 @@ header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWe
 source_name = 'mangago'
 base_url = 'https://www.mangago.me'
 
+
 def fetch_latest():
     latest_data = list()
+    latest_url = f'{base_url}/list/latest/all/1/'
 
-    req = bs(r.get(base_url + '/list/latest/all/1/', headers=header).text, 'html.parser')
+    req = bs(r.get(latest_url, headers=header).text, 'html.parser')
     for i in req.select_one('#search_list').find_all('li'):
         title = i.select_one('div > div > div > span > h2 > a').get_text()
         url = '/' +i.select_one('div > div > div > span > h2 > a')['href'].lstrip(base_url)
         structure = {'manga_title': title, 'manga_url': url}
         latest_data.append(structure)
-    data = {source_name: latest_data}
-    return data
+
+    return {source_name: latest_data}
+
+
+def fetch_popular():
+    popular_url = f'{base_url}/genre/all/1/?f=1&o=1&sortby=view&e='
+    popular_data = list()
+    
+    req = bs(r.get(popular_url, headers=header).text, 'html.parser')
+    for i in req.select('div.flex1'):
+        url = i.a['href'].lstrip(base_url)
+        title = i.span.get_text()
+        cover_url = i.img['data-src']
+        structure = {'manga_title': title, 'manga_url': url, 'manga_cover': cover_url}
+        popular_data.append(structure)
+
+    return {source_name: popular_data}
+
 
 def fetch_search(search):
     req = bs(r.get(f'{base_url}/r/l_search/?name={search}', headers=header).text, 'html.parser')
@@ -29,10 +47,11 @@ def fetch_search(search):
         data.append(structure)
     return data
 
-def fetch_manga(url):
+
+def fetch_manga(manga_slug):
     data = list()
 
-    req = bs(r.get(base_url + url, headers=header).text, 'html.parser')
+    req = bs(r.get(base_url + manga_slug, headers=header).text, 'html.parser')
     for i in req.select_one('#chapter_table > tbody:nth-child(1)').find_all('tr'):
         chapter_title = i.select_one('i > b')
         chapter_url = i.a['href'].lstrip(base_url)
@@ -41,7 +60,8 @@ def fetch_manga(url):
         
     return data
 
-def fetch_pages(chapter_url):
+
+def fetch_pages(chapter_slug):
     page_urls = list()
     data = list()
 
@@ -49,7 +69,7 @@ def fetch_pages(chapter_url):
     fireFoxOptions.headless = True
     brower = webdriver.Firefox(options=fireFoxOptions)
 
-    brower.get(f'{base_url}/{chapter_url}')
+    brower.get(f'{base_url}/{chapter_slug}')
     req = bs(brower.page_source, 'html.parser')
     for i in req.select_one('#dropdown-menu-page').find_all('li'):
         url = i.a['href']
