@@ -23,7 +23,7 @@
 # Latest/Popular/Search
 - {url}/latest?{source}
 - {url}/popular?{source}
-- {url}/search?{source}&{search}
+- {url}/search?{source}&search={search}
 
 ## Latest/Popular/Search Structure
 ```json
