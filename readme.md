@@ -21,26 +21,27 @@
     - Endpoint: /pages 
 
 # Latest/Popular/Search
-- {url}/latest?{source}
-- {url}/popular?{source}
-- {url}/search?{source}&search={search}
+- {url}/latest?source={source}
+- {url}/popular?source={source}
+- {url}/search?source={source}&search={search}
 
 ## Latest/Popular/Search Structure
 ```json
-{"source": {
+{
+    "source": "",
     "manga_title": "",
     "manga_slug": "",
     "manga_cover": ""
-    }
 }
 ```
 
 # Manga Details
-- {url}/manga?{source}&slug={manga_slug}
+- {url}/manga?source={source}&slug={manga_slug}
 
 ## Manga Details Structure
 ```json
-{"source": {
+{
+    "source": "",
     "manga_title": "",
     "manga_cover": "",
     "manga_desc": "",
@@ -52,9 +53,8 @@
         {
         "chapter_title": "",
         "chapter_slug": ""
-            }
-        ]
-    }
+        }
+    ]
 }
 ```
 

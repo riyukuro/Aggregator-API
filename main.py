@@ -13,18 +13,7 @@ class latest(Resource):
         parser.add_argument('source', type=str, required=True) #TODO: Global
         args = parser.parse_args()
 
-        if type(args['source']) is None or args['source'] == 'global': 
-
-            #mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
-            #onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
-            
-            #latest = list()
-            #for i in onlyfiles:
-            #   x = import_module(i.strip('.py'))
-            #   latest.append({str(i.strip('.py')): x.fetch_latest()})
-            #   #Pain Peko
-            #return latest
-            return None
+        if args['source'] == 'global': return get_global('latest')
         
         source = import_module('sources.' + str(args['source']))
         return source.fetch_latest()
@@ -36,18 +25,7 @@ class popular(Resource):
         parser.add_argument('source', type=str, required=True) #TODO: Global
         args = parser.parse_args()
 
-        if type(args['source']) is None or args['source'] == 'global': 
-
-            #mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
-            #onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
-            
-            #latest = list()
-            #for i in onlyfiles:
-            #   x = import_module(i.strip('.py'))
-            #   latest.append({str(i.strip('.py')): x.fetch_latest()})
-            #   #Pain Peko
-            #return latest
-            return None
+        if args['source'] == 'global': return get_global('popular')
         
         source = import_module('sources.' + str(args['source']))
         return source.fetch_popular()
@@ -60,9 +38,7 @@ class search(Resource):
         parser.add_argument('search', type=str, required=True)
         args = parser.parse_args()
 
-        if type(args['source']) is None or args['source'] == 'global':
-            return None
-            #PainPeko
+        if args['source'] == 'global': return get_global('search', args['search'])
 
         source = import_module('sources.' + str(args['source']))
         return source.fetch_search(args['search'])
@@ -79,16 +55,31 @@ class manga(Resource):
         source = import_module('sources.' + str(args['source']))
         return source.fetch_manga(str(args['slug']))
 
-#/pages?search={source}&url={chapter_slug}
+#/pages?search={source}&slug={chapter_slug}
 class pages(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('source', type=str, required=True)
-        parser.add_argument('url', type=str, required=True)
+        parser.add_argument('slug', type=str, required=True)
         args = parser.parse_args()
         source = import_module('sources.' + str(args['source']))
 
-        return source.fetch_pages(str(args['url']))
+        return source.fetch_pages(str(args['slug']))
+
+
+def get_global(*argv):
+
+        mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
+        onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+        data = list()
+
+        for i in onlyfiles:
+            x = import_module('sources.' + i.strip('.py'))
+            if argv[0] == 'popular': data.append(x.fetch_popular())
+            elif argv[0] == 'latest': data.append(x.fetch_latest())
+            else: data.append(x.fetch_search(argv[1]))
+        
+        return data
 
 api.add_resource(latest, '/latest')
 api.add_resource(popular, '/popular')

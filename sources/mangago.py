@@ -1,52 +1,63 @@
 from bs4 import BeautifulSoup as bs
 import requests as r
 from selenium import webdriver
-from constants import HEADER
+from constants import HEADER, LPR_STRUCTURE, MANGA_STRUCTURE
 
 source_name = 'mangago'
 base_url = 'https://www.mangago.me'
+latest_url = f'{base_url}/genre/all/1/?f=1&o=1&sortby=update_date&e='
+popular_url = f'{base_url}/genre/all/1/?f=1&o=1&sortby=view&e='
 
 
 def fetch_latest():
-    latest_url = f'{base_url}/genre/all/1/?f=1&o=1&sortby=update_date&e='
     latest_data = list()
-    
     req = bs(r.get(latest_url, headers=HEADER).text, 'html.parser')
     for i in req.select('div.flex1'):
-        title = i.span.get_text()
-        url = '/' + i.a['href'].lstrip(base_url)
-        cover_url = i.img['data-src']
-        structure = {'manga_title': title, 'manga_slug': url, 'manga_cover': cover_url}
-        latest_data.append(structure)
+        data = LPR_STRUCTURE.copy()
+        data.update(dict(
+            source=source_name,
+            manga_title=i.span.get_text(),
+            manga_slug='/' + i.a['href'].lstrip(base_url),
+            manga_cover=i.img['data-src']
+        ))
 
-    return {source_name: latest_data}
+        latest_data.append(data)
+
+    return latest_data
 
 
 def fetch_popular():
-    popular_url = f'{base_url}/genre/all/1/?f=1&o=1&sortby=view&e='
     popular_data = list()
-    
     req = bs(r.get(popular_url, headers=HEADER).text, 'html.parser')
     for i in req.select('div.flex1'):
-        title = i.span.get_text()
-        url = '/' + i.a['href'].lstrip(base_url)
-        cover_url = i.img['data-src']
-        structure = {'manga_title': title, 'manga_slug': url, 'manga_cover': cover_url}
-        popular_data.append(structure)
+        data = LPR_STRUCTURE.copy()
+        data.update(dict(
+            source=source_name,
+            manga_title=i.span.get_text(),
+            manga_slug='/' + i.a['href'].lstrip(base_url),
+            manga_cover=i.img['data-src']
+        ))
 
-    return {source_name: popular_data}
+        popular_data.append(data)
+
+    return popular_data
 
 
 def fetch_search(search):
     req = bs(r.get(f'{base_url}/r/l_search/?name={search}', headers=HEADER).text, 'html.parser')
     search_data = list()
     for i in req.select_one('#search_list').find_all('li'):
-        title = i.a['title']
-        url = '/' + i.a['href'].lstrip(base_url)
-        cover_url = i.a.img['src']
-        structure = {'manga_title': title, 'manga_slug': url, 'manga_cover': cover_url}
-        search_data.append(structure)
-    return {source_name: search_data}
+        data = LPR_STRUCTURE.copy()
+        data.update(dict(
+            source=source_name,
+            manga_title=i.a['title'],
+            manga_slug='/' + i.a['href'].lstrip(base_url),
+            manga_cover=i.a.img['src']
+        ))
+
+        search_data.append(data)
+
+    return search_data
 
 
 def fetch_manga(manga_slug):
@@ -55,8 +66,7 @@ def fetch_manga(manga_slug):
 
     title = req.select_one('.w-title > h1').get_text().strip()
     cover = req.select_one('.cover > img')['src']
-    desc = req.select_one('div.manga_summary').get_text().strip()
-    
+    desc = req.select_one('div.manga_summary').get_text().replace('\t', '').replace('\n', '')
     status = req.select_one('table.left > tbody > tr > td > span:nth-child(2)').get_text().lower()
     author = ''
     artist = ''
@@ -64,7 +74,6 @@ def fetch_manga(manga_slug):
     for i in req.select_one('table.left > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1)').find_all('a'):
         genres.append(i.get_text())
         
-
     chapters = list()
     for i in req.select_one('#chapter_table > tbody').find_all('tr'):
         chapter_title = " ".join(i.select_one('a').get_text().strip().split())
@@ -73,8 +82,20 @@ def fetch_manga(manga_slug):
         chapters.append(chapter_structure)
     chapters.reverse()
 
-    structure = {"manga_title": title, "manga_cover": cover, "manga_desc": desc, "manga_status": status, "manga_author": author, "manga_artist": artist, "manga_genres": genres, "manga_chapters": chapters}
-    return {source_name: structure}
+    data = MANGA_STRUCTURE.copy()
+    data.update(dict(
+        source=source_name,
+        manga_title=title,
+        manga_cover=cover,
+        manga_desc=desc,
+        manga_status=status,
+        manga_author=author,
+        manga_artist=artist,
+        manga_genres=genres,
+        manga_chapters=chapters
+    ))
+
+    return data
 
 
 def fetch_pages(chapter_slug):
