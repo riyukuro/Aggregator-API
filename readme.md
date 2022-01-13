@@ -1,3 +1,25 @@
+# Simple selfhosted manga aggregator API
+- Primarily for use with Tachiyomi to avoid sources blocking it / cat and mouse games.
+- The developer of this application does not have any affiliation with the content providers available.
+- This project is for learning purposes only.
+
+# Source Functions
+- `fetch_latest`
+    - Fetches latest updated manga
+    - Endpoint: /latest
+- `fetch_popular`
+    - Fetches popular manga
+    - Endpoint: /popular
+- `fetch_search`
+    - Fetches search results
+    - Endpoint: /search
+- `fetch_manga`
+    - Fetches manga details & chapter links/titles
+    - Endpoint: /manga
+- `fetch_pages`
+    - Fetches chapter pages/images
+    - Endpoint: /pages 
+
 # Latest/Popular/Search
 - {url}/latest?{source}
 - {url}/popular?{source}
