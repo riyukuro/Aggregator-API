@@ -29,7 +29,7 @@
 ```json
 {"source": {
     "manga_title": "",
-    "manga_url": "",
+    "manga_slug": "",
     "manga_cover": ""
     }
 }
@@ -51,7 +51,7 @@
     "manga_chapters": [
         {
         "chapter_title": "",
-        "chapter_url": ""
+        "chapter_slug": ""
             }
         ]
     }
