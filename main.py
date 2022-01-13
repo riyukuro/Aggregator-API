@@ -3,9 +3,6 @@ from flask_restful import Resource, Api, reqparse
 from importlib import import_module
 import os
 
-# TODO: Popular
-    #/popular?source={source}
-
 app = Flask(__name__)
 api = Api(app)
 
@@ -13,21 +10,21 @@ api = Api(app)
 class latest(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-
         parser.add_argument('source', type=str, required=True) #TODO: Global
-
         args = parser.parse_args()
+
         if type(args['source']) is None or args['source'] == 'global': 
 
-            mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
-            onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+            #mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
+            #onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
             
-            latest = list()
-            for i in onlyfiles:
-               x = import_module(i.strip('.py'))
-               latest.append({str(i.strip('.py')): x.fetch_latest()})
-               #Pain Peko
-            return latest
+            #latest = list()
+            #for i in onlyfiles:
+            #   x = import_module(i.strip('.py'))
+            #   latest.append({str(i.strip('.py')): x.fetch_latest()})
+            #   #Pain Peko
+            #return latest
+            return None
         
         source = import_module('sources.' + str(args['source']))
         return source.fetch_latest()
@@ -36,21 +33,21 @@ class latest(Resource):
 class popular(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-
         parser.add_argument('source', type=str, required=True) #TODO: Global
-
         args = parser.parse_args()
+
         if type(args['source']) is None or args['source'] == 'global': 
 
-            mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
-            onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+            #mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
+            #onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
             
-            latest = list()
-            for i in onlyfiles:
-               x = import_module(i.strip('.py'))
-               latest.append({str(i.strip('.py')): x.fetch_popular()})
-               #Pain Peko
-            return latest
+            #latest = list()
+            #for i in onlyfiles:
+            #   x = import_module(i.strip('.py'))
+            #   latest.append({str(i.strip('.py')): x.fetch_latest()})
+            #   #Pain Peko
+            #return latest
+            return None
         
         source = import_module('sources.' + str(args['source']))
         return source.fetch_popular()
@@ -69,18 +66,18 @@ class search(Resource):
 
         source = import_module('sources.' + str(args['source']))
         return source.fetch_search(args['search'])
-        
-#/manga?source={source}&url={manga_slug}
+
+#/manga?source={source}&slug={manga_slug}
 class manga(Resource):
     def get(self):
 
         parser = reqparse.RequestParser()
         parser.add_argument('source', type=str, required=True)
-        parser.add_argument('url', type=str, required=True)
+        parser.add_argument('slug', type=str, required=True)
         args = parser.parse_args()
 
         source = import_module('sources.' + str(args['source']))
-        return source.fetch_manga(str(args['url']))
+        return source.fetch_manga(str(args['slug']))
 
 #/pages?search={source}&url={chapter_slug}
 class pages(Resource):
