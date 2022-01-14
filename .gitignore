@@ -129,3 +129,5 @@ dmypy.json
 
 # Random testing
 *.html
+*.sqlite
+*.sqlite3

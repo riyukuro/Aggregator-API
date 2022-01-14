@@ -2,16 +2,18 @@ from bs4 import BeautifulSoup as bs
 import requests as r
 from selenium import webdriver
 from constants import HEADER, LPR_STRUCTURE, MANGA_STRUCTURE
+import requests_cache as rc
 
 source_name = 'mangago'
 base_url = 'https://www.mangago.me'
 latest_url = f'{base_url}/genre/all/1/?f=1&o=1&sortby=update_date&e='
 popular_url = f'{base_url}/genre/all/1/?f=1&o=1&sortby=view&e='
 
+session = rc.CachedSession()
 
 def fetch_latest():
     latest_data = list()
-    req = bs(r.get(latest_url, headers=HEADER).text, 'html.parser')
+    req = bs(session.get(latest_url, headers=HEADER).text, 'html.parser')
     for i in req.select('div.flex1'):
         data = LPR_STRUCTURE.copy()
         data.update(dict(
@@ -28,7 +30,7 @@ def fetch_latest():
 
 def fetch_popular():
     popular_data = list()
-    req = bs(r.get(popular_url, headers=HEADER).text, 'html.parser')
+    req = bs(session.get(popular_url, headers=HEADER).text, 'html.parser')
     for i in req.select('div.flex1'):
         data = LPR_STRUCTURE.copy()
         data.update(dict(
@@ -44,7 +46,7 @@ def fetch_popular():
 
 
 def fetch_search(search):
-    req = bs(r.get(f'{base_url}/r/l_search/?name={search}', headers=HEADER).text, 'html.parser')
+    req = bs(session.get(f'{base_url}/r/l_search/?name={search}', headers=HEADER).text, 'html.parser')
     search_data = list()
     for i in req.select_one('#search_list').find_all('li'):
         data = LPR_STRUCTURE.copy()
@@ -62,11 +64,11 @@ def fetch_search(search):
 
 def fetch_manga(manga_slug):
     manga_url = base_url + manga_slug
-    req = bs(r.get(manga_url, headers=HEADER).text, 'html.parser')
+    req = bs(session.get(manga_url, headers=HEADER).text, 'html.parser')
 
     title = req.select_one('.w-title > h1').get_text().strip()
     cover = req.select_one('.cover > img')['src']
-    desc = req.select_one('div.manga_summary').get_text().replace('\t', '').replace('\n', '')
+    desc = req.select_one('div.manga_summary').get_text().strip().replace('\t', '').replace('\n', '')
     status = req.select_one('table.left > tbody > tr > td > span:nth-child(2)').get_text().lower()
     author = ''
     artist = ''
@@ -104,18 +106,18 @@ def fetch_pages(chapter_slug):
 
     fireFoxOptions = webdriver.FirefoxOptions()
     fireFoxOptions.headless = True
-    brower = webdriver.Firefox(options=fireFoxOptions)
+    browser = webdriver.Firefox(options=fireFoxOptions)
 
-    brower.get(f'{base_url}{chapter_slug}')
-    req = bs(brower.page_source, 'html.parser')
+    browser.get(f'{base_url}{chapter_slug}')
+    req = bs(browser.page_source, 'html.parser')
     for i in req.select_one('#dropdown-menu-page').find_all('li'):
         url = i.a['href']
         page_urls.append(url)
 
     for i in page_urls:
-        brower.get(base_url + i)
-        page_req = bs(brower.page_source, 'html.parser')
+        browser.get(base_url + i)
+        page_req = bs(browser.page_source, 'html.parser')
         image_urls.append(page_req.select_one('img')['src'])
-    brower.quit()
+    browser.quit()
 
     return image_urls

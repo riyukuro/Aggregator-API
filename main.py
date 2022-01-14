@@ -69,17 +69,17 @@ class pages(Resource):
 
 def get_global(*argv):
 
-        mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
-        onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
-        data = list()
+    mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
+    onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+    data = list()
 
-        for i in onlyfiles:
-            x = import_module('sources.' + i.strip('.py'))
-            if argv[0] == 'popular': data.append(x.fetch_popular())
-            elif argv[0] == 'latest': data.append(x.fetch_latest())
-            else: data.append(x.fetch_search(argv[1]))
-        
-        return data
+    for i in onlyfiles:
+        x = import_module('sources.' + i.strip('.py'))
+        if argv[0] == 'popular': data.append(x.fetch_popular())
+        elif argv[0] == 'latest': data.append(x.fetch_latest())
+        else: data.append(x.fetch_search(argv[1]))
+    
+    return data
 
 api.add_resource(latest, '/latest')
 api.add_resource(popular, '/popular')
