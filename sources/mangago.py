@@ -1,7 +1,10 @@
 from bs4 import BeautifulSoup as bs
 import requests as r
 from selenium import webdriver
-from constants import HEADER, LPR_STRUCTURE, MANGA_STRUCTURE
+from constants import HEADER
+from data import LPR, MANGA
+from dataclasses import asdict
+
 import requests_cache as rc
 
 source_name = 'mangago'
@@ -15,15 +18,14 @@ def fetch_latest():
     latest_data = list()
     req = bs(session.get(latest_url, headers=HEADER).text, 'html.parser')
     for i in req.select('div.flex1'):
-        data = LPR_STRUCTURE.copy()
-        data.update(dict(
+        data = LPR(
             source=source_name,
             manga_title=i.span.get_text(),
             manga_slug='/' + i.a['href'].lstrip(base_url),
             manga_cover=i.img['data-src']
-        ))
+        )
 
-        latest_data.append(data)
+        latest_data.append(asdict(data))
 
     return latest_data
 
@@ -32,15 +34,14 @@ def fetch_popular():
     popular_data = list()
     req = bs(session.get(popular_url, headers=HEADER).text, 'html.parser')
     for i in req.select('div.flex1'):
-        data = LPR_STRUCTURE.copy()
-        data.update(dict(
+        data = LPR(
             source=source_name,
             manga_title=i.span.get_text(),
             manga_slug='/' + i.a['href'].lstrip(base_url),
             manga_cover=i.img['data-src']
-        ))
-
-        popular_data.append(data)
+        )
+        
+        popular_data.append(asdict(data))
 
     return popular_data
 
@@ -49,15 +50,14 @@ def fetch_search(search):
     req = bs(session.get(f'{base_url}/r/l_search/?name={search}', headers=HEADER).text, 'html.parser')
     search_data = list()
     for i in req.select_one('#search_list').find_all('li'):
-        data = LPR_STRUCTURE.copy()
-        data.update(dict(
+        data = LPR(
             source=source_name,
             manga_title=i.a['title'],
             manga_slug='/' + i.a['href'].lstrip(base_url),
             manga_cover=i.a.img['src']
-        ))
+        )
 
-        search_data.append(data)
+        search_data.append(asdict(data))
 
     return search_data
 
@@ -84,8 +84,7 @@ def fetch_manga(manga_slug):
         chapters.append(chapter_structure)
     chapters.reverse()
 
-    data = MANGA_STRUCTURE.copy()
-    data.update(dict(
+    data = MANGA(
         source=source_name,
         manga_title=title,
         manga_cover=cover,
@@ -95,9 +94,9 @@ def fetch_manga(manga_slug):
         manga_artist=artist,
         manga_genres=genres,
         manga_chapters=chapters
-    ))
+    )
 
-    return data
+    return asdict(data)
 
 
 def fetch_pages(chapter_slug):

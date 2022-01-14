@@ -75,10 +75,19 @@ def get_global(*argv):
 
     for i in onlyfiles:
         x = import_module('sources.' + i.strip('.py'))
-        if argv[0] == 'popular': data.append(x.fetch_popular())
-        elif argv[0] == 'latest': data.append(x.fetch_latest())
-        else: data.append(x.fetch_search(argv[1]))
-    
+        if argv[0] == 'popular': 
+            for i in x.fetch_popular():
+                if i['manga_title'] not in [y['manga_title'] for y in data]:
+                    data.append(i)
+        elif argv[0] == 'latest': 
+            for i in x.fetch_latest():
+                if i['manga_title'] not in [y['manga_title'] for y in data]:
+                    data.append(i)
+        else: 
+            for i in x.fetch_search(argv[1]):
+                if i['manga_title'] not in [y['manga_title'] for y in data]:
+                    data.append(i)
+
     return data
 
 api.add_resource(latest, '/latest')
