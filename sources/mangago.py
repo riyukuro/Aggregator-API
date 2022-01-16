@@ -1,10 +1,11 @@
 from bs4 import BeautifulSoup as bs
 import requests as r
-from selenium import webdriver
-from constants import HEADER
-from data import LPR, MANGA
-from dataclasses import asdict
+#from selenium import webdriver
+#from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
+import dryscrape
+from constants import HEADER
+from data import LPR, MANGA, CHAPTER
 import requests_cache as rc
 
 source_name = 'mangago'
@@ -23,9 +24,9 @@ def fetch_latest():
             manga_title=i.span.get_text(),
             manga_slug='/' + i.a['href'].lstrip(base_url),
             manga_cover=i.img['data-src']
-        )
+        ).format()
 
-        latest_data.append(asdict(data))
+        latest_data.append(data)
 
     return latest_data
 
@@ -39,9 +40,9 @@ def fetch_popular():
             manga_title=i.span.get_text(),
             manga_slug='/' + i.a['href'].lstrip(base_url),
             manga_cover=i.img['data-src']
-        )
-        
-        popular_data.append(asdict(data))
+        ).format()
+
+        popular_data.append(data)
 
     return popular_data
 
@@ -55,9 +56,9 @@ def fetch_search(search):
             manga_title=i.a['title'],
             manga_slug='/' + i.a['href'].lstrip(base_url),
             manga_cover=i.a.img['src']
-        )
-
-        search_data.append(asdict(data))
+        ).format()
+        
+        search_data.append(data)
 
     return search_data
 
@@ -78,11 +79,12 @@ def fetch_manga(manga_slug):
         
     chapters = list()
     for i in req.select_one('#chapter_table > tbody').find_all('tr'):
-        chapter_title = " ".join(i.select_one('a').get_text().strip().split())
-        chapter_url = '/' + i.a['href'].lstrip(base_url)
-        chapter_structure = {'chapter_title': chapter_title,'chapter_slug': chapter_url}
-        chapters.append(chapter_structure)
-    chapters.reverse()
+        chapter = CHAPTER(
+            source = source_name,
+            chapter_title = " ".join(i.select_one('a').get_text().strip().split()),
+            chapter_slug = '/' + i.a['href'].lstrip(base_url),
+        ).format()
+        chapters.append(chapter)
 
     data = MANGA(
         source=source_name,
@@ -94,29 +96,35 @@ def fetch_manga(manga_slug):
         manga_artist=artist,
         manga_genres=genres,
         manga_chapters=chapters
-    )
+    ).format()
 
-    return asdict(data)
+    return data
 
 
 def fetch_pages(chapter_slug):
+
     page_urls = list()
     image_urls = list()
 
+    """
     fireFoxOptions = webdriver.FirefoxOptions()
     fireFoxOptions.headless = True
-    browser = webdriver.Firefox(options=fireFoxOptions)
+    caps = DesiredCapabilities().FIREFOX
+    caps["pageLoadStrategy"] = "eager"
+    browser = webdriver.Firefox(desired_capabilities=caps, options=fireFoxOptions)
+    """
 
-    browser.get(f'{base_url}{chapter_slug}')
-    req = bs(browser.page_source, 'html.parser')
+    session = dryscrape.Session()
+    session.visit(f'{base_url}{chapter_slug}')
+    session.set_attribute('auto_load_images', False)
+    req = bs(session.body(), 'html.parser')
     for i in req.select_one('#dropdown-menu-page').find_all('li'):
         url = i.a['href']
         page_urls.append(url)
 
     for i in page_urls:
-        browser.get(base_url + i)
-        page_req = bs(browser.page_source, 'html.parser')
+        session.visit(base_url + i)
+        page_req = bs(session.body(), 'html.parser')
         image_urls.append(page_req.select_one('img')['src'])
-    browser.quit()
 
     return image_urls

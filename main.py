@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 api = Api(app)
 
-#/latest?{source}
+#/latest?source={source}
 class latest(Resource):
     def get(self):
         parser = reqparse.RequestParser()
@@ -16,9 +16,9 @@ class latest(Resource):
         if args['source'] == 'global': return get_global('latest')
         
         source = import_module('sources.' + str(args['source']))
-        return source.fetch_latest()
+        return {'data': source.fetch_latest()}
 
-#/popular?{source}
+#/popular?source={source}
 class popular(Resource):
     def get(self):
         parser = reqparse.RequestParser()
@@ -28,7 +28,7 @@ class popular(Resource):
         if args['source'] == 'global': return get_global('popular')
         
         source = import_module('sources.' + str(args['source']))
-        return source.fetch_popular()
+        return {'data': source.fetch_popular()}
 
 #/search?source={source}&search={search}
 class search(Resource):
@@ -41,7 +41,7 @@ class search(Resource):
         if args['source'] == 'global': return get_global('search', args['search'])
 
         source = import_module('sources.' + str(args['source']))
-        return source.fetch_search(args['search'])
+        return {'data': source.fetch_search(args['search'])}
 
 #/manga?source={source}&slug={manga_slug}
 class manga(Resource):
@@ -71,7 +71,7 @@ def get_global(*argv):
 
     mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
     onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
-    data = list()
+    data = []
 
     for i in onlyfiles:
         x = import_module('sources.' + i.strip('.py'))
@@ -88,7 +88,7 @@ def get_global(*argv):
                 if i['manga_title'] not in [y['manga_title'] for y in data]:
                     data.append(i)
 
-    return data
+    return {'data': data}
 
 api.add_resource(latest, '/latest')
 api.add_resource(popular, '/popular')
@@ -98,4 +98,4 @@ api.add_resource(pages, '/pages')
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')

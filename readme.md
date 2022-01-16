@@ -28,9 +28,8 @@
 ## Latest/Popular/Search Structure
 ```json
 {
-    "source": "",
     "manga_title": "",
-    "manga_slug": "",
+    "manga_url": "",
     "manga_cover": ""
 }
 ```
@@ -41,7 +40,6 @@
 ## Manga Details Structure
 ```json
 {
-    "source": "",
     "manga_title": "",
     "manga_cover": "",
     "manga_desc": "",
