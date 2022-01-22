@@ -66,6 +66,16 @@ class pages(Resource):
 
         return source.fetch_pages(str(args['slug']))
 
+class page(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        #parser.add_argument('b64', type=str, required=True)
+        parser.add_argument('source', required=True)
+        parser.add_argument('slug', required=True)
+        args = parser.parse_args()
+
+        source = import_module('sources.' + str(args['source']))
+        return source.fetch_page(str(args['slug']))
 
 def get_global(*argv):
 
@@ -95,7 +105,7 @@ api.add_resource(popular, '/popular')
 api.add_resource(search, '/search')
 api.add_resource(manga, '/manga')
 api.add_resource(pages, '/pages')
-
+api.add_resource(page, '/page')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

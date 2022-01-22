@@ -1,6 +1,5 @@
-requests==2.26.0
 requests-cache==0.9.0
 beautifulsoup4==4.10.0
-dryscrape==1.0
+selenium==3.141.0
 Flask==2.0.2
 Flask-RESTful==0.3.9

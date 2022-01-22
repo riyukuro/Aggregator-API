@@ -1,23 +1,18 @@
+from server import driver
 from bs4 import BeautifulSoup as bs
-import requests as r
-#from selenium import webdriver
-#from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-
-import dryscrape
-from constants import HEADER
 from data import LPR, MANGA, CHAPTER
-import requests_cache as rc
+import re
 
 source_name = 'mangago'
 base_url = 'https://www.mangago.me'
 latest_url = f'{base_url}/genre/all/1/?f=1&o=1&sortby=update_date&e='
 popular_url = f'{base_url}/genre/all/1/?f=1&o=1&sortby=view&e='
 
-session = rc.CachedSession()
+browser = driver()
 
 def fetch_latest():
     latest_data = list()
-    req = bs(session.get(latest_url, headers=HEADER).text, 'html.parser')
+    req = bs(browser.get(latest_url).text, 'html.parser')
     for i in req.select('div.flex1'):
         data = LPR(
             source=source_name,
@@ -33,7 +28,7 @@ def fetch_latest():
 
 def fetch_popular():
     popular_data = list()
-    req = bs(session.get(popular_url, headers=HEADER).text, 'html.parser')
+    req = bs(browser.get(popular_url).text, 'html.parser')
     for i in req.select('div.flex1'):
         data = LPR(
             source=source_name,
@@ -48,7 +43,7 @@ def fetch_popular():
 
 
 def fetch_search(search):
-    req = bs(session.get(f'{base_url}/r/l_search/?name={search}', headers=HEADER).text, 'html.parser')
+    req = bs(browser.get(f'{base_url}/r/l_search/?name={search}').text, 'html.parser')
     search_data = list()
     for i in req.select_one('#search_list').find_all('li'):
         data = LPR(
@@ -65,7 +60,7 @@ def fetch_search(search):
 
 def fetch_manga(manga_slug):
     manga_url = base_url + manga_slug
-    req = bs(session.get(manga_url, headers=HEADER).text, 'html.parser')
+    req = bs(browser.get(manga_url).text, 'html.parser')
 
     title = req.select_one('.w-title > h1').get_text().strip()
     cover = req.select_one('.cover > img')['src']
@@ -104,27 +99,45 @@ def fetch_manga(manga_slug):
 def fetch_pages(chapter_slug):
 
     page_urls = list()
-    image_urls = list()
+    #image_urls = list()
 
-    """
-    fireFoxOptions = webdriver.FirefoxOptions()
-    fireFoxOptions.headless = True
-    caps = DesiredCapabilities().FIREFOX
-    caps["pageLoadStrategy"] = "eager"
-    browser = webdriver.Firefox(desired_capabilities=caps, options=fireFoxOptions)
-    """
-
-    session = dryscrape.Session()
-    session.visit(f'{base_url}{chapter_slug}')
-    session.set_attribute('auto_load_images', False)
-    req = bs(session.body(), 'html.parser')
+    req = bs(browser.get(f'{base_url}{chapter_slug}', js=True).page_source, 'html.parser')
     for i in req.select_one('#dropdown-menu-page').find_all('li'):
         url = i.a['href']
         page_urls.append(url)
+        print(url)
 
-    for i in page_urls:
-        session.visit(base_url + i)
-        page_req = bs(session.body(), 'html.parser')
-        image_urls.append(page_req.select_one('img')['src'])
+    """
+    for i, x in enumerate(page_urls):
+        page_req = bs(browser1.browser("headed", f'{base_url}{x}', js=True), 'html.parser')
+        img = page_req.find('img', id=f'page{i+1}')
 
-    return image_urls
+        if img is None:
+            #not sure if this works on all canvas but for now w.e
+            manga_title = chapter_slug.split('/')[2]
+            chapter = re.findall('[0-9]+', page_req.select_one('div >  h3> span:nth-child(3)').get_text())
+            img = f'https://iweb7.mangapicgallery.com/imgfiles/{manga_title}/{chapter[0]}/00{i}.png'
+
+        image_urls.append(img)
+    """
+
+    browser.close()
+    return page_urls
+
+def fetch_page(page_slug):
+    
+
+    page_req = bs(browser.get(f'{base_url}{page_slug}', js=True).page_source, 'html.parser')
+    page = re.findall('[0-9]+', page_req.select_one('a.page').get_text())[0]
+
+    img = page_req.find('img', id=f'page{page}')['src']
+    print(img)
+
+    if img is None:
+        #not sure if this works on all canvas but for now w.e
+        manga_title = page_req.select_one('#series').get_text().replace(' ', '-')
+        chapter = re.findall('[0-9]+', page_req.select_one('div >  h3 > span:nth-child(3)').get_text())[0]
+        img = f'https://iweb7.mangapicgallery.com/imgfiles/{manga_title}/{chapter}/00{page}.png'
+        
+    browser.close()
+    return [img]
