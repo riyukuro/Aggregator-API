@@ -1,6 +1,6 @@
 def formatting(data: int, source: str, *argv):
     """0 = LPS, 1 = Manga, 2 = Chapter, 3 = Paged"""
-    if data is 0: # LPS
+    if data == 0: # LPS
         """
         arg1 = title: str
         arg2 = slug : str
@@ -11,7 +11,7 @@ def formatting(data: int, source: str, *argv):
             "manga_url": "/manga?source=%s&slug=%s" % (source, argv[1]), 
             "manga_cover": argv[2]
         }
-    if data is 1: # Manga
+    if data == 1: # Manga
         """
         args1 = manga_title: str
         args2 = manga_cover: str
@@ -32,7 +32,7 @@ def formatting(data: int, source: str, *argv):
             'manga_genres': argv[6],
             'manga_chapters': argv[7]
         }
-    if data is 2: #chapter
+    if data == 2: #chapter
         """
         args1 = chapter_title
         args2 = chapter_slug
@@ -41,7 +41,7 @@ def formatting(data: int, source: str, *argv):
             "chapter_title": argv[0],
             "chapter_url": '/pages?source=%s&slug=%s' % (source, argv[1])
             }
-    if data is 3: # paged
+    if data == 3: # paged
         #args1 = page_slug: str
 
         return '/page?source=%s&slug=%s' % (source, argv[0])

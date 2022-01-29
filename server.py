@@ -1,4 +1,5 @@
 import requests_cache as rc
+from requests import exceptions
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from webdriver_manager.firefox import GeckoDriverManager
@@ -12,15 +13,21 @@ class driver:
 
     def get(self, url: str, headless=True, js=False):
         if js is not True and headless is True:
-            return self.session.get(url, headers=HEADER)
+            for i in range(3):
+                try: 
+                    req = self.session.get(url, headers=HEADER)
+                except exceptions.RequestException as e:
+                    if i >= 3:
+                        return e
+                return req
 
         else:
+            #TODO: Implement log checking for status codes.
             firefoxOptions = webdriver.FirefoxOptions()
             firefoxOptions.headless = headless
             caps = DesiredCapabilities().FIREFOX
             caps["pageLoadStrategy"] = "eager"
-            caps["loggingPrefs"] = {'browser': 'ALL'}
-
+            #caps["loggingPrefs"] = {'browser': 'ALL'}
             self.browser = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=firefoxOptions, capabilities=caps)
             self.browser.get(url)
 
