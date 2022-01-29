@@ -1,6 +1,5 @@
 from server import driver
 from bs4 import BeautifulSoup as bs
-#from data import LPR, MANGA, CHAPTER, PAGED
 from data import formatting
 import re
 

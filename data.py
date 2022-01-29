@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-
-
 def formatting(data: int, source: str, *argv):
     """0 = LPS, 1 = Manga, 2 = Chapter, 3 = Paged"""
     if data is 0: # LPS
