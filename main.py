@@ -2,10 +2,8 @@ from flask import Flask
 from flask_restful import Resource, Api, reqparse
 from importlib import import_module
 import os
-
-from PIL import Image
 from requests import get
-from unpaddedbase64 import base64
+import base64
 
 app = Flask(__name__)
 api = Api(app)
