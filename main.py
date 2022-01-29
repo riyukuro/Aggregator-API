@@ -3,6 +3,10 @@ from flask_restful import Resource, Api, reqparse
 from importlib import import_module
 import os
 
+from PIL import Image
+from requests import get
+from unpaddedbase64 import base64
+
 app = Flask(__name__)
 api = Api(app)
 
@@ -55,7 +59,7 @@ class manga(Resource):
         source = import_module('sources.' + str(args['source']))
         return source.fetch_manga(str(args['slug']))
 
-#/pages?search={source}&slug={chapter_slug}
+#/pages?source={source}&slug={chapter_slug}
 class pages(Resource):
     def get(self):
         parser = reqparse.RequestParser()
@@ -66,20 +70,20 @@ class pages(Resource):
 
         return source.fetch_pages(str(args['slug']))
 
-class page(Resource):
-    #TODO: Switch to caching images somehow and retrieve pages with this
-    def get(self):
-        parser = reqparse.RequestParser()
-        #parser.add_argument('b64', type=str, required=True)
-        parser.add_argument('source', required=True)
-        parser.add_argument('slug', required=True)
-        args = parser.parse_args()
+#/page?source={source}&slug={page_slug}
+@app.route('/page', methods=['GET'])
+def page():
+    parser = reqparse.RequestParser()
+    parser.add_argument('source', required=True)
+    parser.add_argument('slug', required=True)
+    args = parser.parse_args()
 
-        source = import_module('sources.' + str(args['source']))
-        if source.isPaged is False:
-            return 'This source is not paged.'
+    source = import_module('sources.' + str(args['source']))
+    if source.isPaged is False: return {'Error': 'This source is not paged.'}
 
-        return source.fetch_page(str(args['slug']))
+    data = base64.b64encode(get(source.fetch_page(str(args['slug']))).content).decode()
+    return {"b64": data}
+    #return f'<img src="data:image/png;base64,{data}">'
 
 def get_global(*argv):
 
@@ -109,7 +113,6 @@ api.add_resource(popular, '/popular')
 api.add_resource(search, '/search')
 api.add_resource(manga, '/manga')
 api.add_resource(pages, '/pages')
-api.add_resource(page, '/page')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

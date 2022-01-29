@@ -130,5 +130,4 @@ def fetch_page(page_slug):
         img = f'https://iweb7.mangapicgallery.com/imgfiles/{manga_title}/{chapter}/00{page}.png'
         
     browser.close()
-    return [img]
-    
+    return img

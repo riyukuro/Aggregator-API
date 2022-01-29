@@ -11,6 +11,7 @@ def formatting(data: int, source: str, *argv):
             "manga_url": "/manga?source=%s&slug=%s" % (source, argv[1]), 
             "manga_cover": argv[2]
         }
+
     elif data == 1: # Manga
         """
         args1 = manga_title: str
@@ -32,6 +33,7 @@ def formatting(data: int, source: str, *argv):
             'manga_genres': argv[6],
             'manga_chapters': argv[7]
         }
+
     elif data == 2: #chapter
         """
         args1 = chapter_title
@@ -41,8 +43,9 @@ def formatting(data: int, source: str, *argv):
             "chapter_title": argv[0],
             "chapter_url": '/pages?source=%s&slug=%s' % (source, argv[1])
             }
-    else: # paged
-        #args1 = page_slug: str
 
+    elif data == 3: # paged
+        #args1 = page_slug: str
         return '/page?source=%s&slug=%s' % (source, argv[0])
-        
+
+    else: return 'Invalid Selection'
