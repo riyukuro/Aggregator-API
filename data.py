@@ -1,52 +1,50 @@
 from dataclasses import dataclass
 
 
-@dataclass
-class LPR:
-    source: str
-    manga_title: str
-    manga_slug: str
-    manga_cover: str
-
-    def format(self):
+def formatting(data: int, source: str, *argv):
+    """0 = LPS, 1 = Manga, 2 = Chapter, 3 = Paged"""
+    if data is 0: # LPS
+        """
+        arg1 = title: str
+        arg2 = slug : str
+        arg3 = manga_cover : str
+        """
         return {
-            "manga_title": self.manga_title, 
-            "manga_url": f"/manga?source={self.source}&slug={self.manga_slug}", 
-            "manga_cover": self.manga_cover
-            }
-
-@dataclass
-class MANGA:
-    source: str
-    manga_title: str
-    manga_cover: str
-    manga_desc: str
-    manga_status: str
-    manga_author: str
-    manga_artist: str
-    manga_genres: list
-    manga_chapters: list
-
-    def format(self):
-        return {
-        'manga_title': self.manga_title,
-        'manga_cover': self.manga_cover,
-        'manga_desc': self.manga_desc,
-        'manga_status': self.manga_status,
-        'manga_author': self.manga_author,
-        'manga_artist': self.manga_artist,
-        'manga_genres': self.manga_genres,
-        'manga_chapters': self.manga_chapters
+            "manga_title": argv[0],
+            "manga_url": "/manga?source=%s&slug=%s" % (source, argv[1]), 
+            "manga_cover": argv[2]
         }
-
-@dataclass
-class CHAPTER:
-    source: str
-    chapter_title: str
-    chapter_slug: str
-
-    def format(self):
+    if data is 1: # Manga
+        """
+        args1 = manga_title: str
+        args2 = manga_cover: str
+        args3 = manga_desc: str
+        args4 = manga_status: str
+        args5 = manga_author: str
+        args6 = manga_artist: str
+        args7 = manga_genres: list
+        args8 = manga_chapters: list
+        """
         return {
-            "chapter_title": self.chapter_title,
-            "chapter_url": f'/pages?source={self.source}&slug={self.chapter_slug}'
+            'manga_title': argv[0],
+            'manga_cover': argv[1],
+            'manga_desc': argv[2],
+            'manga_status': argv[3],
+            'manga_author': argv[4],
+            'manga_artist': argv[5],
+            'manga_genres': argv[6],
+            'manga_chapters': argv[7]
+        }
+    if data is 2: #chapter
+        """
+        args1 = chapter_title
+        args2 = chapter_slug
+        """
+        return {
+            "chapter_title": argv[0],
+            "chapter_url": '/pages?source=%s&slug=%s' % (source, argv[1])
             }
+    if data is 3: # paged
+        #args1 = page_slug: str
+
+        return '/page?source=%s&slug=%s' % (source, argv[0])

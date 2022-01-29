@@ -67,6 +67,7 @@ class pages(Resource):
         return source.fetch_pages(str(args['slug']))
 
 class page(Resource):
+    #TODO: Switch to caching images somehow and retrieve pages with this
     def get(self):
         parser = reqparse.RequestParser()
         #parser.add_argument('b64', type=str, required=True)
@@ -75,6 +76,9 @@ class page(Resource):
         args = parser.parse_args()
 
         source = import_module('sources.' + str(args['source']))
+        if source.isPaged is False:
+            return 'This source is not paged.'
+
         return source.fetch_page(str(args['slug']))
 
 def get_global(*argv):
@@ -109,3 +113,4 @@ api.add_resource(page, '/page')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
+    
