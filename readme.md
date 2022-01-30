@@ -19,6 +19,9 @@
 - `fetch_pages`
     - Fetches chapter pages/images
     - Endpoint: /pages 
+- `fetch_page`
+    - Fetches images for paged sources and returns them as base64.
+    - Endpoint: /page
 
 # Latest/Popular/Search
 - {url}/latest?source={source}
@@ -50,7 +53,7 @@
     "manga_chapters": [
         {
         "chapter_title": "",
-        "chapter_slug": ""
+        "chapter_url": ""
         }
     ]
 }
@@ -58,4 +61,16 @@
 
 # Pages
 - {url}/pages?source={source}&slug={chapter_slug}
-- Returns a list of pages in a chapter
+- Returns a list of pages in a chapter.
+    - If the source isnt paged it returns image urls (otherwise sends a list of /page urls).
+
+# Page
+- {url}/page?source={source}&slug={page_slug}
+- Returns a single base64 encoded image.
+- Used for paged sources.
+
+## Page Structure
+```json
+{
+    "b64": "B64 encoded image"
+}
