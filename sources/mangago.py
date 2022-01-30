@@ -117,7 +117,6 @@ def fetch_pages(chapter_slug):
 def fetch_page(page_slug):
     
     page_req = bs(browser.get(f'{base_url}{page_slug}', js=True).page_source, 'html.parser')
-    print(page_req.select_one('a.page'))
     page = re.findall('[0-9]+', page_req.select_one('a.page').get_text())[0]
 
     img = page_req.find('img', id=f'page{page}')['src']
