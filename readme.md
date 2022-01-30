@@ -66,11 +66,5 @@
 
 # Page
 - {url}/page?source={source}&slug={page_slug}
-- Returns a single base64 encoded image.
+- Returns a single image.
 - Used for paged sources.
-
-## Page Structure
-```json
-{
-    "b64": "B64 encoded image"
-}

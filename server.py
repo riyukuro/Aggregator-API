@@ -9,6 +9,7 @@ HEADER = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWe
 class driver:
     def __init__(self):
         self.session = rc.CachedSession()
+        self.executable = GeckoDriverManager().install()
 
 
     def get(self, url: str, headless=True, js=False):
@@ -28,7 +29,7 @@ class driver:
             caps = DesiredCapabilities().FIREFOX
             caps["pageLoadStrategy"] = "eager"
             #caps["loggingPrefs"] = {'browser': 'ALL'}
-            self.browser = webdriver.Firefox(executable_path=GeckoDriverManager().install(), options=firefoxOptions, capabilities=caps)
+            self.browser = webdriver.Firefox(executable_path=self.executable, options=firefoxOptions, capabilities=caps)
             self.browser.get(url)
 
             return self.browser

@@ -46,6 +46,6 @@ def formatting(data: int, source: str, *argv):
 
     elif data == 3: # paged
         #args0 = page_slug: str
-        return '/page?source=%s&slug=%s' % (source, argv[0])
+        return '/page?source=%s&slug=%s.png' % (source, argv[0])
 
     else: return 'Invalid Selection'

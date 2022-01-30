@@ -66,7 +66,6 @@ def fetch_search(search):
 def fetch_manga(manga_slug):
     manga_url = base_url + manga_slug
     req = bs(browser.get(manga_url).text, 'html.parser')
-    print(browser.get(manga_url).text)
 
     title = req.select_one('.w-title > h1').get_text().strip()
     cover = req.select_one('.cover > img')['src']
@@ -112,16 +111,16 @@ def fetch_pages(chapter_slug):
         page_urls.append(formatting(3, source_name, i.a['href']))
 
     browser.close()
-    return {"isPaged": isPaged, "pages": page_urls}
+    return page_urls
 
 
 def fetch_page(page_slug):
     
     page_req = bs(browser.get(f'{base_url}{page_slug}', js=True).page_source, 'html.parser')
+    print(page_req.select_one('a.page'))
     page = re.findall('[0-9]+', page_req.select_one('a.page').get_text())[0]
 
     img = page_req.find('img', id=f'page{page}')['src']
-    print(img)
 
     if img is None:
         #not sure if this works on all canvas but for now w.e

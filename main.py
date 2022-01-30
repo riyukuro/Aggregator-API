@@ -1,9 +1,9 @@
-from flask import Flask
+from flask import Flask, send_file
 from flask_restful import Resource, Api, reqparse
 from importlib import import_module
 import os
 from requests import get
-import base64
+from io import BytesIO
 
 app = Flask(__name__)
 api = Api(app)
@@ -68,6 +68,7 @@ class pages(Resource):
 
         return source.fetch_pages(str(args['slug']))
 
+
 #/page?source={source}&slug={page_slug}
 @app.route('/page', methods=['GET'])
 def page():
@@ -78,10 +79,12 @@ def page():
 
     source = import_module('sources.' + str(args['source']))
     if source.isPaged is False: return {'Error': 'This source is not paged.'}
+    return send_file(
+        BytesIO(get(source.fetch_page(str(args['slug'].rstrip('.png')))).content),
+        mimetype='image/png',
+        as_attachment=False
+        )
 
-    data = base64.b64encode(get(source.fetch_page(str(args['slug']))).content).decode()
-    return {"b64": data}
-    #return f'<img src="data:image/png;base64,{data}">'
 
 def get_global(*argv):
 
