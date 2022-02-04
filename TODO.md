@@ -1,0 +1,2 @@
+- Handle pages for latest/popular
+- Add dates for chapters

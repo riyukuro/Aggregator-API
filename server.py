@@ -15,11 +15,9 @@ class driver:
     def get(self, url: str, headless=True, js=False):
         if js is not True and headless is True:
             for i in range(3):
-                try: 
-                    req = self.session.get(url, headers=HEADER)
+                try: req = self.session.get(url, headers=HEADER)
                 except exceptions.RequestException as e:
-                    if i >= 3:
-                        return e
+                    if i >= 3: return e
                 return req
 
         else:
@@ -30,7 +28,6 @@ class driver:
             caps["pageLoadStrategy"] = "eager"
             #caps["loggingPrefs"] = {'browser': 'ALL'}
             self.browser = webdriver.Firefox(executable_path=self.executable, options=firefoxOptions, capabilities=caps)
-            self.browser.get(url)
 
             return self.browser
 
@@ -38,3 +35,7 @@ class driver:
     def close(self):
         return self.browser.close()
         
+
+from importlib import import_module
+def server_import(source): 
+    return getattr(import_module('sources.' + source), source)()

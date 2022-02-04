@@ -1,51 +1,33 @@
-def formatting(data: int, source: str, *argv):
-    """0 = LPS, 1 = Manga, 2 = Chapter, 3 = Paged"""
-    if data == 0: # LPS
-        """
-        arg0 = title: str
-        arg1 = slug : str
-        arg2 = manga_cover : str
-        """
-        return {
-            "manga_title": argv[0],
-            "manga_url": "/manga?source=%s&slug=%s" % (source, argv[1]), 
-            "manga_cover": argv[2]
-        }
+def formatting(type: int, **kwargs):
+    """type: 0 = LPS, 1 = Manga, 2 = Chapter, 3 = Paged"""
 
-    elif data == 1: # Manga
-        """
-        args0 = manga_title: str
-        args1 = manga_cover: str
-        args2 = manga_desc: str
-        args3 = manga_status: str
-        args4 = manga_author: str
-        args5 = manga_artist: str
-        args6 = manga_genres: list
-        args7 = manga_chapters: list
-        """
-        return {
-            'manga_title': argv[0],
-            'manga_cover': argv[1],
-            'manga_desc': argv[2],
-            'manga_status': argv[3],
-            'manga_author': argv[4],
-            'manga_artist': argv[5],
-            'manga_genres': argv[6],
-            'manga_chapters': argv[7]
-        }
-
-    elif data == 2: #chapter
-        """
-        args0 = chapter_title
-        args1 = chapter_slug
-        """
-        return {
-            "chapter_title": argv[0],
-            "chapter_url": '/pages?source=%s&slug=%s' % (source, argv[1])
+    match type:
+        case 0:
+            return {
+                "manga_title": kwargs['title'],
+                "manga_url": "/manga?source=%s&slug=%s" % (kwargs['source'], kwargs['slug']),
+                "manga_cover": kwargs['cover']
             }
 
-    elif data == 3: # paged
-        #args0 = page_slug: str
-        return '/page?source=%s&slug=%s.png' % (source, argv[0])
+        case 1:
+            return {
+                'manga_title': kwargs['title'],
+                'manga_cover': kwargs['cover'],
+                'manga_desc': kwargs['desc'],
+                'manga_status': kwargs['status'],
+                'manga_author': kwargs['author'],
+                'manga_artist': kwargs['artist'],
+                'manga_genres': kwargs['genres'],
+                'manga_chapters': kwargs['chapters']
+            }
 
-    else: return 'Invalid Selection'
+        case 2:
+            return {
+                "chapter_title": kwargs['title'],
+                "chapter_url": '/pages?source=%s&slug=%s' % (kwargs['source'], kwargs['slug'])
+                }
+
+        case 3:
+            return '/page?source=%s&slug=%s.png' % (kwargs['source'], kwargs['slug'])
+
+    return 'Invalid Selection'

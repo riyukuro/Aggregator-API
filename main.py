@@ -1,9 +1,10 @@
 from flask import Flask, send_file
 from flask_restful import Resource, Api, reqparse
-from importlib import import_module
+from server import server_import
 import os
 from requests import get
 from io import BytesIO
+
 
 app = Flask(__name__)
 api = Api(app)
@@ -17,7 +18,7 @@ class latest(Resource):
 
         if args['source'] == 'global': return get_global('latest')
         
-        source = import_module('sources.' + str(args['source']))
+        source = server_import(str(args['source']))
         return {'data': source.fetch_latest()}
 
 #/popular?source={source}
@@ -29,7 +30,7 @@ class popular(Resource):
 
         if args['source'] == 'global': return get_global('popular')
         
-        source = import_module('sources.' + str(args['source']))
+        source = server_import(str(args['source']))
         return {'data': source.fetch_popular()}
 
 #/search?source={source}&search={search}
@@ -42,7 +43,7 @@ class search(Resource):
 
         if args['source'] == 'global': return get_global('search', args['search'])
 
-        source = import_module('sources.' + str(args['source']))
+        source = server_import(str(args['source']))
         return {'data': source.fetch_search(args['search'])}
 
 #/manga?source={source}&slug={manga_slug}
@@ -54,7 +55,7 @@ class manga(Resource):
         parser.add_argument('slug', type=str, required=True)
         args = parser.parse_args()
 
-        source = import_module('sources.' + str(args['source']))
+        source = server_import(str(args['source']))
         return source.fetch_manga(str(args['slug']))
 
 #/pages?source={source}&slug={chapter_slug}
@@ -64,8 +65,8 @@ class pages(Resource):
         parser.add_argument('source', type=str, required=True)
         parser.add_argument('slug', type=str, required=True)
         args = parser.parse_args()
-        source = import_module('sources.' + str(args['source']))
 
+        source = server_import(str(args['source']))
         return source.fetch_pages(str(args['slug']))
 
 
@@ -77,7 +78,7 @@ def page():
     parser.add_argument('slug', required=True)
     args = parser.parse_args()
 
-    source = import_module('sources.' + str(args['source']))
+    source = server_import(str(args['source']))
     if source.isPaged is False: return {'Error': 'This source is not paged.'}
     return send_file(
         BytesIO(get(source.fetch_page(str(args['slug'].rstrip('.png')))).content),
@@ -91,9 +92,8 @@ def get_global(*argv):
     mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
     onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
     data = []
-
     for i in onlyfiles:
-        x = import_module('sources.' + i.strip('.py'))
+        x = server_import(i.strip('.py'))
         if argv[0] == 'popular': 
             for i in x.fetch_popular():
                 if i['manga_title'] not in [y['manga_title'] for y in data]:
