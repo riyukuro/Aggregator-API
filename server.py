@@ -28,7 +28,8 @@ class driver:
             caps["pageLoadStrategy"] = "eager"
             #caps["loggingPrefs"] = {'browser': 'ALL'}
             self.browser = webdriver.Firefox(executable_path=self.executable, options=firefoxOptions, capabilities=caps)
-
+            self.browser.get(url)
+            
             return self.browser
 
 
