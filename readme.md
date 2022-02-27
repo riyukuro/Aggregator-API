@@ -64,7 +64,35 @@
 - Returns a list of pages in a chapter.
     - If the source isnt paged it returns image urls (otherwise sends a list of /page urls).
 
+# Pages Structure
+```json
+{
+    "isPaged": False,
+    "pages": [
+        "page1_url",
+        "page2_url",
+        "page3_url",
+        "etc."
+    ]
+
+}
+```
+
 # Page
 - {url}/page?source={source}&slug={page_slug}
 - Returns a single image.
 - Used for paged sources.
+
+# Sources
+- {url}/sources
+- Returns a list of sources available
+
+## Sources Structure
+```json
+{
+    "sources": [
+        "source",
+        "source2"
+    ]
+}
+```

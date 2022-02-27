@@ -94,6 +94,7 @@ class WPMangaStream:
             genres = genres,
             chapters = chapters
         )
+        
     def fetch_pages(self, slug):
         req = bs(self.browser.get(self.base_url+slug).text, 'html.parser')
 

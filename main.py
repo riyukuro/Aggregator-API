@@ -67,8 +67,7 @@ class pages(Resource):
         args = parser.parse_args()
 
         source = server_import(str(args['source']))
-        return source.fetch_pages(str(args['slug']))
-
+        return {'isPaged': source.isPaged, 'pages': source.fetch_pages(str(args['slug']))}
 
 #/page?source={source}&slug={page_slug}
 @app.route('/page', methods=['GET'])
@@ -86,14 +85,17 @@ def page():
         as_attachment=False
         )
 
+class sources(Resource):
+    def get(self):
+        mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
+        return {'sources': [f.strip('.py') for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]}
 
 def get_global(*argv):
-
     mypath = os.path.dirname(os.path.abspath(__file__)) + '/sources'
-    onlyfiles = [f for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
+    source_list = [f.strip('.py') for f in os.listdir(mypath) if os.path.isfile(os.path.join(mypath, f))]
     data = []
-    for i in onlyfiles:
-        x = server_import(i.strip('.py'))
+    for i in source_list:
+        x = server_import(i)
         if argv[0] == 'popular': 
             for i in x.fetch_popular():
                 if i['manga_title'] not in [y['manga_title'] for y in data]:
@@ -114,6 +116,7 @@ api.add_resource(popular, '/popular')
 api.add_resource(search, '/search')
 api.add_resource(manga, '/manga')
 api.add_resource(pages, '/pages')
+api.add_resource(sources, '/sources')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
