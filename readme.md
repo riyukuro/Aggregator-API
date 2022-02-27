@@ -67,7 +67,7 @@
 # Pages Structure
 ```json
 {
-    "isPaged": False,
+    "isPaged": false,
     "pages": [
         "page1_url",
         "page2_url",
